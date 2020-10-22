@@ -1,29 +1,31 @@
 $(function() {
 	console.log("jquery is enabled!");
-	var customer = new Customer();
-	$("#btnGetCustomer").click(customer.getSampleCustomer());
+	var trade = new Trade();
+	$("#btnBookTrade").click(function() { trade.bookTrade() });
 });
 
-function Customer() {
+function Trade() {
 
 	var _this = this;
 	_this.appRoot = $("#hfAppRoot").val();
 	
-	this.getSampleCustomer = function() {
+	this.bookTrade = function() {
+	    var trade = { id:100, tradeId:100, tradeISIN:200, TradeAmount:300};
 		$.ajax({
 			  type: "POST",
-			  url: _this.appRoot + "/pure-rest/customer",
-			  data: "id=100",			  
+			  url: _this.appRoot + "book-trade",
+			  contentType: "application/json; charset=utf-8",
+			  data: JSON.stringify(trade),
 			  success: function(data) { 
-				console.log("getSampleCustomer() success!"); 
+				console.log("bookTrade() success!");
 			  },
 			  error: function(err, err2) {
-				  console.log("getSampleCustomer() error!");
-				  console.log("getSampleCustomer() error!");
-				  console.log("getSampleCustomer() error!");
+				  console.log("bookTrade() error!");
+				  console.log("bookTrade() error!");
+				  console.log("bookTrade() error!");
 			  },			  
 			  complete: function() { 
-				console.log("getSampleCustomer() complete."); 
+				console.log("bookTrade() complete.");
 			  }
 		});
 	};

@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RestController
 public class SimpleController {
 
-	@RequestMapping("/")
-	public String index() {
-		return "Greetings from Spring Boot 222!";
+	@RequestMapping("/hello")
+	public String hello() {
+		return "Hello from Spring Boot 222!";
 	}
 
 	@RequestMapping("/echo")
