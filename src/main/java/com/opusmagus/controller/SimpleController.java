@@ -8,7 +8,12 @@ public class SimpleController {
 
 	@RequestMapping("/")
 	public String index() {
-		return "Greetings from Spring Boot!";
+		return "Greetings from Spring Boot 222!";
+	}
+
+	@RequestMapping("/echo")
+	public String echo() {
+		return "Echo";
 	}
 
 }
