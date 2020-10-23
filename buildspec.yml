@@ -32,3 +32,4 @@ artifacts:
     - sh/start-web-server.sh
     - sh/stop-web-server.sh
     - sh/before-install.sh
+    - linux-service/trading-app.service
