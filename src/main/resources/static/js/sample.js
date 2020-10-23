@@ -10,7 +10,9 @@ function Trade() {
 	_this.appRoot = $("#hfAppRoot").val();
 	
 	this.bookTrade = function() {
-	    var trade = { id:100, tradeId:100, tradeISIN:200, TradeAmount:300};
+		var isin = $("#tradeISIN").val();
+		var amount = $("#tradeAmount").val();
+	    var trade = { Id:100, TradeId:100, TradeISIN:isin, TradeAmount:amount};
 		$.ajax({
 			  type: "POST",
 			  url: _this.appRoot + "book-trade",

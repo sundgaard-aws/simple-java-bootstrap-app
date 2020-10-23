@@ -3,16 +3,44 @@
 <head>
     <title>Welcome to Octank Trading</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link rel="stylesheet" href="/css/jquery-ui.structure.min.css" type="text/css">
+    <link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
+    <link rel="stylesheet" href="/css/opusmagus.css" type="text/css">
 
     <script type="text/javascript" src="/js/jquery-3.1.1.min.js"></script>
-    <script type="text/javascript" src="/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="/js/sample.js"></script>
 </head>
 <body>
     <input type="hidden" id="hfAppRoot" value="/">
-    Trade Amount: <input type="text>
-    Trade ISIN: <input type="text>
-    <div id="btnBookTrade" class="button">Book trade</div>
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <img src="img/stock-board.jpg" style="height:180px;">
+            </div>
+        </div>
+        </div>
+        <div class="row">
+            <div class="col-3">
+                Trade Amount: <input id="tradeAmount" type="text">
+            </div>
+            <div class="col-3">
+                Trade ISIN: <input id="tradeISIN" type="text">
+            </div>
+            <div class="col-6">
+                &nbsp;
+            </div>
+        </div>      
+        <div class="row">
+            <div class="col-3">
+                <button id="btnBookTrade" type="button" class="btn btn-primary">Book trade</button>
+            </div>
+            <div class="col-3">
+                <button id="btnMassBookTrades" type="button" class="btn btn-primary">Mass book trades</button>
+            </div>
+            <div class="col-6">
+                &nbsp;
+            </div>
+        </div>
+    </div>
 </body>
 </html>
