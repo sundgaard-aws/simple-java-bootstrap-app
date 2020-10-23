@@ -1,0 +1,19 @@
+  
+version: 0.0
+os: linux
+files:
+  - source: trading-app-0.0.1-SNAPSHOT.jar
+    destination: /var/app/
+hooks:
+  ApplicationStop:
+    - location: stop-web-server.sh
+      timeout: 300
+      runas: root
+  BeforeInstall:
+    - location: before-install.sh
+      timeout: 300
+      runas: root
+  ApplicationStart:
+    - location: start-web-server.sh
+      timeout: 300
+      runas: root
