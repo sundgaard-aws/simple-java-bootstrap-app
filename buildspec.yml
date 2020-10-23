@@ -31,5 +31,6 @@ artifacts:
     - target/trading-app-0.0.1-SNAPSHOT.jar
     - sh/start-web-server.sh
     - sh/stop-web-server.sh
-    - sh/before-install.sh
+    - sh/after-install.sh
     - linux-service/trading-app.service
+    - appspec.yml
