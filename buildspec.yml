@@ -34,3 +34,4 @@ artifacts:
     - sh/after-install.sh
     - linux-service/trading-app.service
     - appspec.yml
+  discard-paths: yes
