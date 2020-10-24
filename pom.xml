@@ -83,6 +83,9 @@
 						<groupId>org.springframework</groupId>
 						<artifactId>springloaded</artifactId>
 						<version>1.2.8.RELEASE</version>
+						<configuration>    
+                			<mainClass>com.opusmagus.Application</mainClass>
+            			</configuration>
 					</dependency>
 				</dependencies>
 			</plugin>
