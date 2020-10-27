@@ -10,6 +10,7 @@ import com.amazonaws.services.sqs.model.SendMessageRequest;
 import com.google.gson.Gson;
 import com.opusmagus.dto.Trade;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,6 +28,7 @@ import java.util.UUID;
 public class TradeController {
 	@Autowired private Gson json;
 	@Autowired private Calendar calendar;
+	@Autowired private SimpMessagingTemplate template;
 
 	@PostMapping(path = "/book-trade")
 	public Trade bookTrade(@RequestBody  Trade trade) {
@@ -73,6 +75,7 @@ public class TradeController {
 			.withDelaySeconds(5);
 		sqs.sendMessage(send_msg_request);
 		System.out.println("Message was put on queue");
+		template.convertAndSend("/topic/trade-updates", trade);
 	}
 
 }

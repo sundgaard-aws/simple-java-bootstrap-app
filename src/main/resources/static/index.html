@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="/css/opusmagus.css" type="text/css">
 
     <script type="text/javascript" src="/js/jquery-3.1.1.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script type="text/javascript" src="/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="/js/sample.js"></script>
 </head>
@@ -47,10 +49,10 @@
                 Status
             </div>
             <div class="col-4">
-                &nbsp;
+                <button id="btnConnectToTradeSocket" type="button" class="btn btn-primary">Connect to trade socket</button>
             </div>
             <div class="col-4">
-                &nbsp;
+                <button id="btnSendtoTradeSocket" type="button" class="btn btn-primary">Send to trade socket</button>
             </div>
         </div>        
     </div>
