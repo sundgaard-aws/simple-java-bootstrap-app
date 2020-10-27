@@ -1,5 +1,9 @@
 package com.opusmagus.controller;
 
+import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement;
+import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder;
+import com.amazonaws.services.simplesystemsmanagement.model.GetParameterRequest;
+import com.amazonaws.services.simplesystemsmanagement.model.GetParameterResult;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
@@ -50,14 +54,23 @@ public class TradeController {
 		return trade;
 	}
 
-	// https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/examples-sqs-visibility-timeout.html
-	public void PostToTradeQueue(Trade trade) {
+	/*** 
+		https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/examples-sqs-visibility-timeout.html
+		https://docs.aws.amazon.com/cdk/latest/guide/get_ssm_value.html
+	 	https://gist.github.com/davidrosenstark/4a33f2c0eab59d9d7e429bd1c20aea92
+	 ***/
+	private void PostToTradeQueue(Trade trade) {
 		AmazonSQS sqs = AmazonSQSClientBuilder.defaultClient();
-		var queueUrl = "https://sqs.eu-central-1.amazonaws.com/299199322523/iac-demo-sqs";
+		//GetParameterRequest getparameterRequest = new GetParameterRequest().withName("my-key").withWithDecryption(encryption);
+		AWSSimpleSystemsManagement ssmClient = AWSSimpleSystemsManagementClientBuilder.defaultClient();
+		GetParameterRequest getparameterRequest = new GetParameterRequest().withName("iac-demo-sqs-queue-url");
+		final GetParameterResult result = ssmClient.getParameter(getparameterRequest);
+		String queueUrl = result.getParameter().getValue();
+		System.out.println("iac-demo-sqs-queue-url=" + queueUrl);
 		SendMessageRequest send_msg_request = new SendMessageRequest()
-				.withQueueUrl(queueUrl)
-				.withMessageBody(json.toJson(trade))
-				.withDelaySeconds(5);
+			.withQueueUrl(queueUrl)
+			.withMessageBody(json.toJson(trade))
+			.withDelaySeconds(5);
 		sqs.sendMessage(send_msg_request);
 		System.out.println("Message was put on queue");
 	}

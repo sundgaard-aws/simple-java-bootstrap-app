@@ -19,3 +19,7 @@ sudo systemctl start trading-app.service
 # Check the status of the service.
 sudo systemctl status  trading-app.service
 ```
+
+# Windows kill process
+netstat -ano | findstr :8080
+taskkill /PID <PID> /F
