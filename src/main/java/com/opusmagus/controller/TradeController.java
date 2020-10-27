@@ -15,7 +15,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.UUID;
 
 /** Note that we have annotated the DemoController class with @Controller and @RequestMapping("/welcome"). 
@@ -34,7 +37,7 @@ public class TradeController {
 	public Trade bookTrade(@RequestBody  Trade trade) {
 		if(trade != null && trade.TradeAmount != null) {
 			trade.TradeId = UUID.randomUUID().toString();
-			trade.EventTime = calendar.getTime().toString();
+			trade.EventTime = now();
 			System.out.println("Trade=" + json.toJson(trade));
 			PostToTradeQueue(trade);
 		}
@@ -47,13 +50,19 @@ public class TradeController {
 		if(trade != null && trade.TradeAmount != null) {
 			for(int i=0;i<100;i++) {
 				trade.TradeId = UUID.randomUUID().toString();
-				trade.EventTime = calendar.getTime().toString();
+				trade.EventTime = now();
 				PostToTradeQueue(trade);
 				System.out.println("Trade=" + json.toJson(trade));
 			}
 		}
 		else System.out.println("Trade was null, not doing anything");
 		return trade;
+	}
+
+	private String now() {
+		LocalDateTime now = LocalDateTime.now();
+		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.ENGLISH);
+		return dateTimeFormatter.format(now);
 	}
 
 	/*** 

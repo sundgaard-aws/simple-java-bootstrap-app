@@ -12,6 +12,7 @@ import java.util.Date;
 
 // https://www.baeldung.com/java-websockets
 // https://www.baeldung.com/spring-websockets-send-message-to-user
+// https://abhishek-gupta.gitbook.io/java-websocket-api-handbook/receiving-messages
 //@ServerEndpoint(value = "/trade-socket/")
 @Controller
 public class TradeMessageHandler {

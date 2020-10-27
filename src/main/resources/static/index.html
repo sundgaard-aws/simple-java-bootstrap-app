@@ -10,7 +10,8 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script type="text/javascript" src="/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="/js/sample.js"></script>
+    <script type="text/javascript" src="/js/trade.js"></script>
+    <script type="text/javascript" src="/js/tradeEvents.js"></script>
 </head>
 <body>
     <input type="hidden" id="hfAppRoot" value="/">
@@ -44,6 +45,10 @@
                 &nbsp;
             </div>
         </div>
+        <div class="row">
+            <div id="statusUpdateWidget" style="background-color: black; color:aqua; height: 16rem; width: 10rem; overflow: scroll;" class="col-12">                
+            </div>
+        </div>                
         <div class="row">
             <div class="col-4">
                 Status
