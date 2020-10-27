@@ -2,7 +2,7 @@
 Description="Trading App Web"
 
 [Service]
-ExecStart=/usr/lib/jvm/java-11-amazon-corretto.x86_64/bin/java -jar /var/app/trading-app-0.0.1-SNAPSHOT.jar --server.port=80
+ExecStart=/usr/bin/java -jar /var/app/trading-app-0.0.1-SNAPSHOT.jar --server.port=80
 WorkingDirectory=/var/app
 Restart=always
 RestartSec=10
