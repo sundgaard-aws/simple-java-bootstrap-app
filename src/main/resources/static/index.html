@@ -16,47 +16,42 @@
 <body>
     <input type="hidden" id="hfAppRoot" value="/">
     <div class="container">
-        <h1>Trading App v1.0.002</h1>
+        <div class="row align-items-center justify-content-start" >
+            <div class="col-12">
+                <h1>Trading App v1.0.003</h1>
+                <h2 id="instanceId">Instance ID:</h2>
+            </div>
+        </div>
         <div class="row">
             <div class="col-12">
-                <img src="img/stock-board.jpg" style="height:180px;">
+                <img src="img/stock-market-board-wide.jpg" style="width: 100%">
             </div>
         </div>
-        </div>
-        <div class="row">
-            <div class="col-3">
+        <div class="row align-items-center justify-content-start" style="margin-top: 1rem;">
+            <div class="col-2">
                 Trade Amount: <input id="tradeAmount" type="text">
             </div>
-            <div class="col-3">
+            <div class="col-2">
                 Trade ISIN: <input id="tradeISIN" type="text">
             </div>
-            <div class="col-6">
+            <div class="col-8">
                 &nbsp;
-            </div>
+            </div>            
         </div>      
-        <div class="row">
-            <div class="col-4">
-                <button id="btnBookTrade" type="button" class="btn btn-primary">Book trade</button>
-            </div>
-            <div class="col-4">
+        <div class="row align-items-center justify-content-start" style="margin-top: 1rem;">
+            <div class="col-12">
+                <button id="btnBookTrade" type="button" class="btn btn-primary">Book trade</button>                
                 <button id="btnMassBookTrade" type="button" class="btn btn-primary">Mass book trade</button>
             </div>
-            <div class="col-4">
-                &nbsp;
-            </div>
         </div>
-        <div class="row">
-            <div id="statusUpdateWidget" style="background-color: black; color:aqua; height: 16rem; width: 10rem; overflow: scroll;" class="col-12">                
+        <div class="row align-items-center justify-content-start">
+            <div class="col">
+                <div id="statusUpdateWidget" style="background-color: black; color:aqua; height: 16rem; width: 100%; overflow: auto; margin-top: 3rem;"></div>            
             </div>
         </div>                
-        <div class="row">
-            <div class="col-4">
-                Status
-            </div>
-            <div class="col-4">
+        <div class="row align-items-center justify-content-start" style="margin-top: 1rem;">
+            <div class="col-12">
                 <button id="btnConnectToTradeSocket" type="button" class="btn btn-primary">Connect to trade socket</button>
-            </div>
-            <div class="col-4">
                 <button id="btnSendtoTradeSocket" type="button" class="btn btn-primary">Send to trade socket</button>
             </div>
         </div>        

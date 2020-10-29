@@ -1,7 +1,8 @@
 $(function () {
 	console.log("jquery is enabled!");
 	console.log("Trade JS file initialized.");
-	var trade = new Trade();
+	new Infrastructure().updateInstanceId();
+	var trade = new Trade();	
 	$("#btnBookTrade").click(function () { trade.bookTrade() });
 	$("#btnMassBookTrade").click(function () { trade.massBookTrade() });
 });
@@ -50,6 +51,31 @@ function Trade() {
 			},
 			complete: function () {
 				console.log("massBookTrade() complete.");
+			}
+		});
+	};	
+}
+
+function Infrastructure() {
+	var _this = this;
+	_this.appRoot = $("#hfAppRoot").val();
+
+	this.updateInstanceId = function () {
+		$.ajax({
+			type: "GET",
+			url: _this.appRoot + "instance-id",
+			contentType: "application/json; charset=utf-8",
+			data: {},
+			success: function (data) {
+				$("#instanceId").html("Instance ID:" + data);
+				console.log(data);
+				console.log("instanceId() success!");
+			},
+			error: function (err, err2) {
+				console.error("instanceId() error!");
+			},
+			complete: function () {
+				console.log("instanceId() complete.");
 			}
 		});
 	};
