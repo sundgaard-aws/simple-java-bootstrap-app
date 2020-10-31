@@ -32,6 +32,7 @@ artifacts:
     - sh/start-web-server.sh
     - sh/stop-web-server.sh
     - sh/after-install.sh
+    - sh/validate-service.sh
     - linux-service/trading-app.service
     - appspec.yml
   discard-paths: yes

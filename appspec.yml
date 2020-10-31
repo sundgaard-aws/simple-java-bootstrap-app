@@ -19,3 +19,7 @@ hooks:
     - location: start-web-server.sh
       timeout: 300
       runas: root
+  ValidateService:
+    - location: validate-service.sh
+      timeout: 300
+      runas: root

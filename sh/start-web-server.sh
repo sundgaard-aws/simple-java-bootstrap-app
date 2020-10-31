@@ -6,4 +6,5 @@ ls -al
 # should really run as a service, check below link
 # https://www.baeldung.com/spring-boot-app-as-a-service
 
+systemctl enable trading-app.service
 systemctl start trading-app.service
