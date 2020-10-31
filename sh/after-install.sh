@@ -7,8 +7,8 @@ cd /var/app
 rm -Rf jar
 mkdir jar
 cd jar
-/usr/bin/jar xf ../*.jar
+/bin/jar xf ../*.jar
 rm -f ../*.jar
 echo Creating new uncompressed JAR...
-/usr/bin/jar cmvf0 META-INF/MANIFEST.MF ../trading-app-0.0.1-SNAPSHOT.jar *
+/bin/jar cmvf0 META-INF/MANIFEST.MF ../trading-app-0.0.1-SNAPSHOT.jar *
 echo Done.
