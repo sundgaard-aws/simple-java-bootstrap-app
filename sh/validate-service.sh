@@ -1,3 +1,4 @@
+#!bin/bash
 echo Validating that the service is running
 systemctl status trading-app.service | head -n 4
 httpStatusCode=`/usr/bin/curl -o /dev/null -s -w "%{http_code}\n" http://localhost`
