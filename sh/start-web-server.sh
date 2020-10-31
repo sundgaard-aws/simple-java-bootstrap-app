@@ -1,4 +1,4 @@
-#!bin/bash
+#!/bin/bash
 echo $PWD
 ls -al
 # Notice that /var/app is configured in appspec.yml and could be any path you want
