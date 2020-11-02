@@ -5,6 +5,7 @@ $(function () {
 	var trade = new Trade();	
 	$("#btnBookTrade").click(function () { trade.bookTrade() });
 	$("#btnMassBookTrade").click(function () { trade.massBookTrade() });
+	$("#btnGetTrades").click(function () { trade.getTrades() });
 });
 
 function Trade() {
@@ -15,7 +16,8 @@ function Trade() {
 	this.bookTrade = function () {
 		var isin = $("#tradeISIN").val();
 		var amount = $("#tradeAmount").val();
-		var trade = { TradeISIN: isin, TradeAmount: amount };
+		var userId = "DEMO-USER";
+		var trade = { TradeISIN: isin, TradeAmount: amount, UserId: userId };
 		$.ajax({
 			type: "POST",
 			url: _this.appRoot + "book-trade",
@@ -51,6 +53,24 @@ function Trade() {
 			},
 			complete: function () {
 				console.log("massBookTrade() complete.");
+			}
+		});
+	};	
+
+	this.getTrades = function () {
+		$.ajax({
+			type: "POST",
+			url: _this.appRoot + "get-trades",
+			contentType: "application/json; charset=utf-8",
+			data: "DEMO-USER",
+			success: function (data) {
+				console.log("getTrades() success!");
+			},
+			error: function (err, err2) {
+				console.error("getTrades() error!");
+			},
+			complete: function () {
+				console.log("getTrades() complete.");
 			}
 		});
 	};	
