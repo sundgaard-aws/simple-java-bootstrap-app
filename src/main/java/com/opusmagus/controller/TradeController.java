@@ -52,7 +52,7 @@ public class TradeController {
 		logMessage("Booking trade...");
 		if(trade != null && trade.TradeAmount != null) {
 			trade.TradeId = UUID.randomUUID().toString();
-			trade.EventTime = now();
+			trade.TradeDate = now();
 			logMessage("Trade=" + json.toJson(trade));
 			PostToTradeQueue(trade);
 		}
@@ -143,10 +143,17 @@ public class TradeController {
 		List<Trade> trades = new ArrayList<>();
 		try {
 			stmt = conn.createStatement();
-			rs = stmt.executeQuery("SELECT * FROM trade LIMIT 10");
+			rs = stmt.executeQuery("SELECT * FROM trade LIMIT 100");
 			while(rs.next()) {
+				// trade_id,user_id,trade_status,trade_isin,trade_amount,quote,trade_date
 				Trade trade = new Trade();
 				trade.TradeId = rs.getString("trade_id");
+				trade.TradeDate = rs.getString("trade_date");
+				trade.TradeISIN = rs.getString("trade_isin");
+				trade.TradeAmount = rs.getString("trade_amount");
+				trade.TradeStatus = rs.getString("trade_status");
+				trade.UserId = rs.getString("user_id");
+
 				trades.add(trade);
 			}
 			return trades;
