@@ -89,7 +89,8 @@ public class TradeController {
 		logMessage("iac-demo-rds-secret-dbname=" + secret.dbname);
 		logMessage("iac-demo-rds-secret-username=" + secret.username);
 
-		if(System.getenv("DB-ENV").equals("LOCAL")) return localTradeResponse();
+		String dbEnv = System.getenv("DB-ENV");
+		if(dbEnv != null && dbEnv.equals("LOCAL")) return localTradeResponse();
 		Connection conn = null;
 		TradeResponse tradeResponse = new TradeResponse();
 		try {
