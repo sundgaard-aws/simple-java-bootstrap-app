@@ -26,7 +26,7 @@ public class TradeMessageHandler {
         System.out.print("TradeMessageHandler.send() called...");
         String time = new SimpleDateFormat("HH:mm").format(new Date());
         Trade trade = new Trade();
-        trade.EventTime = new SimpleDateFormat("HH:mm").format(new Date());
+        trade.TradeDate = new SimpleDateFormat("HH:mm").format(new Date());
         trade.TradeId = "100";
 
         /*for(int i=0;i<10;i++) {

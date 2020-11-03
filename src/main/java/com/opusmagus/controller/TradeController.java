@@ -66,7 +66,7 @@ public class TradeController {
 		if(trade != null && trade.TradeAmount != null) {
 			for(int i=0;i<100;i++) {
 				trade.TradeId = UUID.randomUUID().toString();
-				trade.EventTime = now();
+				trade.TradeDate = now();
 				PostToTradeQueue(trade);
 				logMessage("Trade=" + json.toJson(trade));
 			}
