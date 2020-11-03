@@ -149,7 +149,7 @@ public class TradeController {
 		List<Trade> trades = new ArrayList<>();
 		try {
 			stmt = conn.createStatement();
-			rs = stmt.executeQuery("SELECT * FROM trade LIMIT 100");
+			rs = stmt.executeQuery("SELECT * FROM trade LIMIT 20 ORDER BY trade_date DESC");
 			while(rs.next()) {
 				// trade_id,user_id,trade_status,trade_isin,trade_amount,quote,trade_date
 				Trade trade = new Trade();
@@ -245,7 +245,10 @@ public class TradeController {
 
 	private String now() {
 		LocalDateTime now = LocalDateTime.now();
-		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.ENGLISH);
+		//DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.ENGLISH);
+		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS", Locale.ENGLISH);
+		//System.out.println("now=" + dateTimeFormatter.format(now));
+		// MYSQL 9999-12-31 23:59:59.999999
 		return dateTimeFormatter.format(now);
 	}
 
