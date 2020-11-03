@@ -149,7 +149,7 @@ public class TradeController {
 		List<Trade> trades = new ArrayList<>();
 		try {
 			stmt = conn.createStatement();
-			rs = stmt.executeQuery("SELECT * FROM trade LIMIT 20 ORDER BY trade_date DESC");
+			rs = stmt.executeQuery("SELECT * FROM trade ORDER BY trade_date DESC LIMIT 20");
 			while(rs.next()) {
 				// trade_id,user_id,trade_status,trade_isin,trade_amount,quote,trade_date
 				Trade trade = new Trade();
