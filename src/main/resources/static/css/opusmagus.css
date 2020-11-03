@@ -3,7 +3,12 @@
 }
 
 body {
-	font-size: 10pt;
+	font-size: 12pt;
+	font-family: Consolas, Calibri, Arial;
 	color: #ffffff;
 	background-color: #2e2b2b;
+}
+
+#tradeItemTemplate {
+	display: none;
 }

@@ -6,6 +6,7 @@ $(function () {
 	$("#btnBookTrade").click(function () { trade.bookTrade() });
 	$("#btnMassBookTrade").click(function () { trade.massBookTrade() });
 	$("#btnGetTrades").click(function () { trade.getTrades() });
+	setInterval(function() { trade.getTrades(); }, 5 * 1000); // 60 * 1000 milsec
 });
 
 function Trade() {
@@ -65,6 +66,21 @@ function Trade() {
 			data: "DEMO-USER",
 			success: function (data) {
 				console.log("getTrades() success!");
+				$("#tradeItems").empty();
+
+				for(var i=0; i<data.Trades.length; i++) {
+					var clone = $("#tradeItemTemplate").clone();
+					$(clone).removeAttr("id");
+					$(clone).find(".trade-id").html(data.Trades[i].TradeId);
+					$(clone).find(".trade-isin").html(data.Trades[i].TradeISIN);
+					$(clone).find(".trade-date").html(data.Trades[i].TradeDate);
+					$(clone).find(".user-id").html(data.Trades[i].UserId);
+					$(clone).find(".trade-status").html(data.Trades[i].TradeStatus);
+					$(clone).find(".trade-amount").html(data.Trades[i].TradeAmount);
+					$(clone).find(".quote").html(data.Trades[i].Quote);
+					$("#tradeItems").append(clone);
+					if(i > 4) break;
+				}
 			},
 			error: function (err, err2) {
 				console.error("getTrades() error!");

@@ -89,6 +89,7 @@ public class TradeController {
 		logMessage("iac-demo-rds-secret-dbname=" + secret.dbname);
 		logMessage("iac-demo-rds-secret-username=" + secret.username);
 
+		if(System.getenv("DB-ENV").equals("LOCAL")) return localTradeResponse();
 		Connection conn = null;
 		TradeResponse tradeResponse = new TradeResponse();
 		try {
@@ -104,6 +105,32 @@ public class TradeController {
 			//throw ex;
 			return tradeResponse;
 		}
+	}
+
+	private TradeResponse localTradeResponse() {
+		System.out.println("Returning a local trade response as we are not running inside AWS...");
+		TradeResponse tradeResponse = new TradeResponse();
+		TradeMetaData tradeMetaData = new TradeMetaData();
+		tradeMetaData.PendingTrades = 3;
+		tradeMetaData.ValidTrades = 55;
+		tradeMetaData.TotalTrades = 60;
+		tradeMetaData.InvalidTrades = 2;
+
+		List<Trade> trades = new ArrayList<>();
+		for(int i=0;i<20;i++) {
+			Trade trade = new Trade();
+			trade.UserId = "DEMO-USER";
+			trade.TradeStatus = "VALID";
+			trade.TradeISIN = "AMZ";
+			trade.TradeDate = now();
+			trade.TradeId = UUID.randomUUID().toString();
+			trade.TradeAmount = String.valueOf(Math.round(Math.random()*100));
+			trade.Quote = getQuote();
+			trades.add(trade);
+		}
+		tradeResponse.TradeMetaData = tradeMetaData;
+		tradeResponse.Trades = trades;
+		return tradeResponse;
 	}
 
 	private String getQuote() {
