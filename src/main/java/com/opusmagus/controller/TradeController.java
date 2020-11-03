@@ -52,6 +52,7 @@ public class TradeController {
 		logMessage("Booking trade...");
 		if(trade != null && trade.TradeAmount != null) {
 			trade.TradeId = UUID.randomUUID().toString();
+			trade.Quote = getQuote();
 			trade.TradeDate = now();
 			logMessage("Trade=" + json.toJson(trade));
 			PostToTradeQueue(trade);
@@ -66,6 +67,7 @@ public class TradeController {
 		if(trade != null && trade.TradeAmount != null) {
 			for(int i=0;i<100;i++) {
 				trade.TradeId = UUID.randomUUID().toString();
+				trade.Quote = getQuote();
 				trade.TradeDate = now();
 				PostToTradeQueue(trade);
 				logMessage("Trade=" + json.toJson(trade));
@@ -102,6 +104,10 @@ public class TradeController {
 			//throw ex;
 			return tradeResponse;
 		}
+	}
+
+	private String getQuote() {
+		return String.valueOf((Math.random()*2000));
 	}
 
 	private void logMessage(String message, String logGroupName, String logStreamName) {
@@ -153,6 +159,7 @@ public class TradeController {
 				trade.TradeAmount = rs.getString("trade_amount");
 				trade.TradeStatus = rs.getString("trade_status");
 				trade.UserId = rs.getString("user_id");
+				trade.Quote = rs.getString("quote");
 
 				trades.add(trade);
 			}
@@ -182,10 +189,11 @@ public class TradeController {
 			if(rs.next()) { tradeMetaData.TotalTrades = rs.getInt("trade_count"); }
 			rs = stmt.executeQuery("SELECT count(1) as trade_count FROM trade WHERE trade_status = 'VALID'");
 			if(rs.next()) { tradeMetaData.ValidTrades = rs.getInt("trade_count"); }
-			rs = stmt.executeQuery("SELECT count(1) as trade_count FROM trade WHERE trade_status = 'INVALID'");
+			rs = stmt.executeQuery("SELECT count(1) as trade_count FROM trade WHERE trade_status in ('INVALID','VALIDATION_START_FAILED')");
 			if(rs.next()) { tradeMetaData.InvalidTrades = rs.getInt("trade_count"); }
-			rs = stmt.executeQuery("SELECT count(1) as trade_count FROM trade WHERE trade_status = 'PENDING'");
+			rs = stmt.executeQuery("SELECT count(1) as trade_count FROM trade WHERE trade_status in ('PENDING_VALIDATION','VALIDATION_STARTED')");
 			if(rs.next()) { tradeMetaData.PendingTrades = rs.getInt("trade_count"); }
+
 			return tradeMetaData;
 		}
 		catch (SQLException ex) {

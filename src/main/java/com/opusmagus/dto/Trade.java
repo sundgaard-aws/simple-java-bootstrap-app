@@ -8,4 +8,5 @@ public class Trade {
 	public String TradeDate;
 	public String TradeStatus;
 	public String UserId;
+	public String Quote;
 }
