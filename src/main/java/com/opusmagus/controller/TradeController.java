@@ -1,5 +1,10 @@
 package com.opusmagus.controller;
 
+import com.amazonaws.services.logs.AWSLogs;
+import com.amazonaws.services.logs.model.DescribeLogStreamsRequest;
+import com.amazonaws.services.logs.model.InputLogEvent;
+import com.amazonaws.services.logs.model.LogStream;
+import com.amazonaws.services.logs.model.PutLogEventsRequest;
 import com.amazonaws.services.secretsmanager.AWSSecretsManager;
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest;
@@ -14,6 +19,8 @@ import com.amazonaws.services.sqs.model.SendMessageRequest;
 import com.google.gson.Gson;
 import com.opusmagus.dto.DBSecret;
 import com.opusmagus.dto.Trade;
+import com.opusmagus.dto.TradeMetaData;
+import com.opusmagus.dto.TradeResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +31,7 @@ import java.nio.ByteBuffer;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.*;
 
 /** Note that we have annotated the DemoController class with @Controller and @RequestMapping("/welcome"). 
@@ -35,67 +43,98 @@ import java.util.*;
 @RestController
 public class TradeController {
 	@Autowired private Gson json;
+	@Autowired private AWSLogs cloudWatchLogger;
 	@Autowired private Calendar calendar;
 	@Autowired private SimpMessagingTemplate template;
 
 	@PostMapping(path = "/book-trade")
 	public Trade bookTrade(@RequestBody  Trade trade) {
+		logMessage("Booking trade...");
 		if(trade != null && trade.TradeAmount != null) {
 			trade.TradeId = UUID.randomUUID().toString();
 			trade.EventTime = now();
-			System.out.println("Trade=" + json.toJson(trade));
+			logMessage("Trade=" + json.toJson(trade));
 			PostToTradeQueue(trade);
 		}
-		else System.out.println("Trade was null, not doing anything");
+		else logMessage("Trade was null, not doing anything");
 		return trade;
 	}
 
 	@PostMapping(path = "/mass-book-trade")
 	public Trade massBookTrade(@RequestBody  Trade trade) {
+		logMessage("Mass booking trades...");
 		if(trade != null && trade.TradeAmount != null) {
 			for(int i=0;i<100;i++) {
 				trade.TradeId = UUID.randomUUID().toString();
 				trade.EventTime = now();
 				PostToTradeQueue(trade);
-				System.out.println("Trade=" + json.toJson(trade));
+				logMessage("Trade=" + json.toJson(trade));
 			}
 		}
-		else System.out.println("Trade was null, not doing anything");
+		else logMessage("Trade was null, not doing anything");
 		return trade;
 	}
 
 	@PostMapping(path = "/get-trades")
-	public List<Trade> getTrades(String userId) throws Exception {
+	public TradeResponse getTrades(String userId) throws Exception {
+		logMessage("Getting trades...");
 		AWSSimpleSystemsManagement ssmClient = AWSSimpleSystemsManagementClientBuilder.defaultClient();
 		GetParameterRequest getparameterRequest = new GetParameterRequest().withName("iac-demo-rds-secret-arn");
 		final GetParameterResult result = ssmClient.getParameter(getparameterRequest);
 		String rdsSecretArn = result.getParameter().getValue();
-		System.out.println("iac-demo-rds-secret-arn=" + rdsSecretArn);
+		logMessage("iac-demo-rds-secret-arn=" + rdsSecretArn);
 		DBSecret secret = getSecret(rdsSecretArn);
-		System.out.println("iac-demo-rds-secret-dbname=" + secret.dbname);
-		System.out.println("iac-demo-rds-secret-username=" + secret.username);
+		logMessage("iac-demo-rds-secret-dbname=" + secret.dbname);
+		logMessage("iac-demo-rds-secret-username=" + secret.username);
 
 		Connection conn = null;
+		TradeResponse tradeResponse = new TradeResponse();
 		try {
 			conn =	DriverManager.getConnection("jdbc:mysql://" + secret.host + "/" + secret.dbname + "?" + "user=" + secret.username + "&password="+ secret.password);
-			return getTrades(conn, userId);
+			tradeResponse.Trades = getTrades(conn, userId);
+			tradeResponse.TradeMetaData = getTradeMetaData(conn, userId);
+			return tradeResponse;
 		} catch (SQLException ex) {
-			// handle any errors
-			System.out.println("SQLException: " + ex.getMessage());
-			System.out.println("SQLState: " + ex.getSQLState());
-			System.out.println("VendorError: " + ex.getErrorCode());
-			throw ex;
+			logError(ex.getMessage());
+			logError("SQLException: " + ex.getMessage());
+			logError("SQLState: " + ex.getSQLState());
+			logError("VendorError: " + ex.getErrorCode());
+			//throw ex;
+			return tradeResponse;
 		}
+	}
 
-		/*if(trade != null && trade.TradeAmount != null) {
-			trade.TradeId = UUID.randomUUID().toString();
-			trade.EventTime = now();
-			System.out.println("Trade=" + json.toJson(trade));
-			PostToTradeQueue(trade);
+	private void logMessage(String message, String logGroupName, String logStreamName) {
+		PutLogEventsRequest logEventsRequest = new PutLogEventsRequest();
+		List<InputLogEvent> logEvents = new ArrayList<>();
+		InputLogEvent inputLogEvent = new InputLogEvent();
+		inputLogEvent.withTimestamp(new Date().getTime()).withMessage(message);
+		logEvents.add(inputLogEvent);
+
+		//String sequenceToken = logEventsRequest.withLogGroupName(logGroupName).withLogStreamName("iac-demo-web-log-stream").getSequenceToken();
+		String sequenceToken = null;
+		DescribeLogStreamsRequest describeLogStreamsRequest = new DescribeLogStreamsRequest();
+		describeLogStreamsRequest.setLogGroupName(logGroupName);
+		List<LogStream> logStreamList= cloudWatchLogger.describeLogStreams(describeLogStreamsRequest).getLogStreams();
+		for (LogStream logStream: logStreamList) {
+			if (logStream.getLogStreamName().equals(logStreamName)) {
+				sequenceToken = logStream.getUploadSequenceToken();
+				//System.out.println("sequenceToken="+sequenceToken);
+			}
 		}
-		else System.out.println("Trade was null, not doing anything");
-		return trade;*/
-		//return null;
+		if(sequenceToken != null)
+			logEventsRequest.withLogGroupName(logGroupName).withLogStreamName(logStreamName).withSequenceToken(sequenceToken).setLogEvents(logEvents);
+		else
+			logEventsRequest.withLogGroupName(logGroupName).withLogStreamName(logStreamName).setLogEvents(logEvents);
+		cloudWatchLogger.putLogEvents(logEventsRequest);
+	}
+
+	private void logMessage(String message) {
+		logMessage(message, "iac-demo-web-log-group", "iac-demo-web-log-stream");
+	}
+
+	private void logError(String message) {
+		logMessage(message, "iac-demo-web-log-group", "iac-demo-web-err-stream");
 	}
 
 	private List<Trade> getTrades(Connection conn, String userId) throws Exception {
@@ -105,7 +144,6 @@ public class TradeController {
 		try {
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery("SELECT * FROM trade LIMIT 10");
-			// Now do something with the ResultSet ....
 			while(rs.next()) {
 				Trade trade = new Trade();
 				trade.TradeId = rs.getString("trade_id");
@@ -113,29 +151,48 @@ public class TradeController {
 			}
 			return trades;
 		}
-		catch (SQLException ex){
-			// handle any errors
-			System.out.println("SQLException: " + ex.getMessage());
-			System.out.println("SQLState: " + ex.getSQLState());
-			System.out.println("VendorError: " + ex.getErrorCode());
-			throw ex;
+		catch (SQLException ex) {
+			logError(ex.getMessage());
+			logError("SQLException: " + ex.getMessage());
+			logError("SQLState: " + ex.getSQLState());
+			logError("VendorError: " + ex.getErrorCode());
+			return null;
 		}
 		finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException sqlEx) { } // ignore
-				rs = null;
-			}
-
-			if (stmt != null) {
-				try {
-					stmt.close();
-				} catch (SQLException sqlEx) { } // ignore
-				stmt = null;
-			}
+			if (rs != null) {try {rs.close();} catch (SQLException sqlEx) { } rs = null; }
+			if (stmt != null) { try { stmt.close(); } catch (SQLException sqlEx) { } stmt = null; }
 		}
-		//return null;
+	}
+
+	private TradeMetaData getTradeMetaData(Connection conn, String userId) throws Exception {
+		Statement stmt = null;
+		ResultSet rs = null;
+		List<Trade> trades = new ArrayList<>();
+		try {
+			stmt = conn.createStatement();
+			TradeMetaData tradeMetaData = new TradeMetaData();
+			rs = stmt.executeQuery("SELECT count(1) as trade_count FROM trade");
+			if(rs.next()) { tradeMetaData.TotalTrades = rs.getInt("trade_count"); }
+			rs = stmt.executeQuery("SELECT count(1) as trade_count FROM trade WHERE trade_status = 'VALID'");
+			if(rs.next()) { tradeMetaData.ValidTrades = rs.getInt("trade_count"); }
+			rs = stmt.executeQuery("SELECT count(1) as trade_count FROM trade WHERE trade_status = 'INVALID'");
+			if(rs.next()) { tradeMetaData.InvalidTrades = rs.getInt("trade_count"); }
+			rs = stmt.executeQuery("SELECT count(1) as trade_count FROM trade WHERE trade_status = 'PENDING'");
+			if(rs.next()) { tradeMetaData.PendingTrades = rs.getInt("trade_count"); }
+			return tradeMetaData;
+		}
+		catch (SQLException ex) {
+			logError(ex.getMessage());
+			logError("SQLException: " + ex.getMessage());
+			logError("SQLState: " + ex.getSQLState());
+			logError("VendorError: " + ex.getErrorCode());
+			//throw ex;
+			return null;
+		}
+		finally {
+			if (rs != null) {try {rs.close();} catch (SQLException sqlEx) { } rs = null; }
+			if (stmt != null) { try { stmt.close(); } catch (SQLException sqlEx) { } stmt = null; }
+		}
 	}
 
 	private DBSecret getSecret(String secretName) throws Exception {
@@ -148,7 +205,7 @@ public class TradeController {
 			getSecretValueResult = secretsManager.getSecretValue(getSecretValueRequest);
 
 		} catch(Exception e) {
-			System.out.println("The request was invalid due to: " + e.getMessage());
+			logError("The request was invalid due to: " + e.getMessage());
 			throw e;
 		}
 
@@ -189,13 +246,13 @@ public class TradeController {
 		GetParameterRequest getparameterRequest = new GetParameterRequest().withName("iac-demo-sqs-queue-url");
 		final GetParameterResult result = ssmClient.getParameter(getparameterRequest);
 		String queueUrl = result.getParameter().getValue();
-		System.out.println("iac-demo-sqs-queue-url=" + queueUrl);
+		logMessage("iac-demo-sqs-queue-url=" + queueUrl);
 		SendMessageRequest sendMessageRequest = new SendMessageRequest()
 			.withQueueUrl(queueUrl)
 			.withMessageBody(json.toJson(trade))
 			.withDelaySeconds(5);
 		sqs.sendMessage(sendMessageRequest);
-		System.out.println("Message was put on queue");
+		logMessage("Message was put on queue");
 		template.convertAndSend("/topic/trade-updates", trade);
 	}
 

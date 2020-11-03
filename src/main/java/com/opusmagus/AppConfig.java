@@ -1,5 +1,7 @@
 package com.opusmagus;
 
+import com.amazonaws.services.logs.AWSLogs;
+import com.amazonaws.services.logs.AWSLogsClientBuilder;
 import com.google.gson.Gson;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +20,9 @@ public class AppConfig {
     public Calendar Calendar() {
         return Calendar.getInstance(TimeZone.getTimeZone("CET"));
     }
+
+    @Bean
+    public AWSLogs CloudWatchLogger() { return AWSLogsClientBuilder.defaultClient(); }
 }
 
 
