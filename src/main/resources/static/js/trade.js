@@ -79,7 +79,7 @@ function Trade() {
 					$(clone).removeAttr("id");
 					$(clone).find(".trade-id").html(tradeId.substring(tradeId.length-12));
 					$(clone).find(".trade-isin").html(data.Trades[i].TradeISIN);
-					$(clone).find(".trade-date").html(tradeDate.substring(5, tradeDate.length-7));
+					$(clone).find(".trade-date").html(tradeDate.substring(5, tradeDate.length-3));
 					$(clone).find(".user-id").html(data.Trades[i].UserId);
 					$(clone).find(".trade-status").html(data.Trades[i].TradeStatus);
 					$(clone).find(".trade-amount").html(Number(tradeAmount).toFixed(0));
