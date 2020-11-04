@@ -76,15 +76,15 @@ public class TradeController {
 
 	@PostMapping(path = "/get-trades")
 	public TradeResponse getTrades(String userId) throws Exception {
-		logMessage("Getting trades...");
+		//logMessage("Getting trades...");
 		AWSSimpleSystemsManagement ssmClient = AWSSimpleSystemsManagementClientBuilder.defaultClient();
 		GetParameterRequest getparameterRequest = new GetParameterRequest().withName("iac-demo-rds-secret-arn");
 		final GetParameterResult result = ssmClient.getParameter(getparameterRequest);
 		String rdsSecretArn = result.getParameter().getValue();
-		logMessage("iac-demo-rds-secret-arn=" + rdsSecretArn);
+		//logMessage("iac-demo-rds-secret-arn=" + rdsSecretArn);
 		DBSecret secret = getSecret(rdsSecretArn);
-		logMessage("iac-demo-rds-secret-dbname=" + secret.dbname);
-		logMessage("iac-demo-rds-secret-username=" + secret.username);
+		//logMessage("iac-demo-rds-secret-dbname=" + secret.dbname);
+		//logMessage("iac-demo-rds-secret-username=" + secret.username);
 
 		String dbEnv = System.getenv("DB-ENV");
 		if(dbEnv != null && dbEnv.equals("LOCAL")) return localTradeResponse();
@@ -296,20 +296,25 @@ public class TradeController {
 	 	https://gist.github.com/davidrosenstark/4a33f2c0eab59d9d7e429bd1c20aea92
 	 ***/
 	private void PostToTradeQueue(Trade trade) {
-		AmazonSQS sqs = AmazonSQSClientBuilder.defaultClient();
-		//GetParameterRequest getparameterRequest = new GetParameterRequest().withName("my-key").withWithDecryption(encryption);
-		AWSSimpleSystemsManagement ssmClient = AWSSimpleSystemsManagementClientBuilder.defaultClient();
-		GetParameterRequest getparameterRequest = new GetParameterRequest().withName("iac-demo-sqs-queue-url");
-		final GetParameterResult result = ssmClient.getParameter(getparameterRequest);
-		String queueUrl = result.getParameter().getValue();
-		logMessage("iac-demo-sqs-queue-url=" + queueUrl);
-		SendMessageRequest sendMessageRequest = new SendMessageRequest()
-			.withQueueUrl(queueUrl)
-			.withMessageBody(json.toJson(trade))
-			.withDelaySeconds(5);
-		sqs.sendMessage(sendMessageRequest);
-		logMessage("Message was put on queue");
-		template.convertAndSend("/topic/trade-updates", trade);
+		try {
+			AmazonSQS sqs = AmazonSQSClientBuilder.defaultClient();
+			//GetParameterRequest getparameterRequest = new GetParameterRequest().withName("my-key").withWithDecryption(encryption);
+			AWSSimpleSystemsManagement ssmClient = AWSSimpleSystemsManagementClientBuilder.defaultClient();
+			GetParameterRequest getparameterRequest = new GetParameterRequest().withName("iac-demo-sqs-queue-url");
+			final GetParameterResult result = ssmClient.getParameter(getparameterRequest);
+			String queueUrl = result.getParameter().getValue();
+			logMessage("iac-demo-sqs-queue-url=" + queueUrl);
+			SendMessageRequest sendMessageRequest = new SendMessageRequest()
+					.withQueueUrl(queueUrl)
+					.withMessageBody(json.toJson(trade))
+					.withDelaySeconds(5);
+			sqs.sendMessage(sendMessageRequest);
+			logMessage("Message with trade id [" + trade.TradeId + "] was put on queue.");
+		}
+		catch(Exception ex) {
+			logError(ex.getMessage());
+		}
+		//template.convertAndSend("/topic/trade-updates", trade);
 	}
 
 }
