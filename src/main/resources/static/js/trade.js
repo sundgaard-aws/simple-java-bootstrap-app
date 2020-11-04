@@ -40,7 +40,8 @@ function Trade() {
 	this.massBookTrade = function () {
 		var isin = $("#tradeISIN").val();
 		var amount = $("#tradeAmount").val();
-		var trade = { TradeISIN: isin, TradeAmount: amount };
+		var userId = "DEMO-USER";
+		var trade = { TradeISIN: isin, TradeAmount: amount, UserId: userId };
 		$.ajax({
 			type: "POST",
 			url: _this.appRoot + "mass-book-trade",
@@ -87,10 +88,10 @@ function Trade() {
 					if(i > 6) break;
 				}
 
-				$("#totalTrades").html(data.TradeMetaData.InvalidTrades);
+				$("#totalTrades").html(data.TradeMetaData.TotalTrades);
 				$("#pendingTrades").html(data.TradeMetaData.PendingTrades);
-				$("#validTrades").html(data.TradeMetaData.TotalTrades);
-				$("#invalidTrades").html(data.TradeMetaData.ValidTrades);
+				$("#validTrades").html(data.TradeMetaData.ValidTrades);
+				$("#invalidTrades").html(data.TradeMetaData.InvalidTrades);
 			},
 			error: function (err, err2) {
 				console.error("getTrades() error!");
