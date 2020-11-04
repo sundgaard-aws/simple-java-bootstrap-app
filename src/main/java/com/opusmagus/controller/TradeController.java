@@ -171,6 +171,10 @@ public class TradeController {
 			//System.err.println(ex.getMessage());
 			logEventsRequest.withLogGroupName(logGroupName).withLogStreamName(logStreamName).withSequenceToken(ex.getExpectedSequenceToken()).setLogEvents(logEvents);
 		}
+		catch(Exception ex) {
+			// For any other errors we ignore them for now
+			ex.printStackTrace();
+		}
 	}
 
 	private void logMessage(String message) {
@@ -313,6 +317,7 @@ public class TradeController {
 		}
 		catch(Exception ex) {
 			logError(ex.getMessage());
+			logError(ex.getStackTrace()[0].toString());
 		}
 		//template.convertAndSend("/topic/trade-updates", trade);
 	}
