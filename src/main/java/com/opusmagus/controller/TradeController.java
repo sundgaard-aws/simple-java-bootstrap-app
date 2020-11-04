@@ -1,10 +1,7 @@
 package com.opusmagus.controller;
 
 import com.amazonaws.services.logs.AWSLogs;
-import com.amazonaws.services.logs.model.DescribeLogStreamsRequest;
-import com.amazonaws.services.logs.model.InputLogEvent;
-import com.amazonaws.services.logs.model.LogStream;
-import com.amazonaws.services.logs.model.PutLogEventsRequest;
+import com.amazonaws.services.logs.model.*;
 import com.amazonaws.services.secretsmanager.AWSSecretsManager;
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest;
@@ -149,18 +146,31 @@ public class TradeController {
 		String sequenceToken = null;
 		DescribeLogStreamsRequest describeLogStreamsRequest = new DescribeLogStreamsRequest();
 		describeLogStreamsRequest.setLogGroupName(logGroupName);
-		List<LogStream> logStreamList= cloudWatchLogger.describeLogStreams(describeLogStreamsRequest).getLogStreams();
-		for (LogStream logStream: logStreamList) {
-			if (logStream.getLogStreamName().equals(logStreamName)) {
-				sequenceToken = logStream.getUploadSequenceToken();
-				//System.out.println("sequenceToken="+sequenceToken);
+
+		boolean logSuccess = false;
+		int logFailCount = 0;
+		try {
+			List<LogStream> logStreamList = cloudWatchLogger.describeLogStreams(describeLogStreamsRequest).getLogStreams();
+			for (LogStream logStream : logStreamList) {
+				if (logStream.getLogStreamName().equals(logStreamName)) {
+					sequenceToken = logStream.getUploadSequenceToken();
+					//System.out.println("sequenceToken="+sequenceToken);
+				}
 			}
+			if (sequenceToken != null)
+				logEventsRequest.withLogGroupName(logGroupName).withLogStreamName(logStreamName).withSequenceToken(sequenceToken).setLogEvents(logEvents);
+			else
+				logEventsRequest.withLogGroupName(logGroupName).withLogStreamName(logStreamName).setLogEvents(logEvents);
+			cloudWatchLogger.putLogEvents(logEventsRequest);
 		}
-		if(sequenceToken != null)
-			logEventsRequest.withLogGroupName(logGroupName).withLogStreamName(logStreamName).withSequenceToken(sequenceToken).setLogEvents(logEvents);
-		else
-			logEventsRequest.withLogGroupName(logGroupName).withLogStreamName(logStreamName).setLogEvents(logEvents);
-		cloudWatchLogger.putLogEvents(logEventsRequest);
+		catch(DataAlreadyAcceptedException ex) {
+			//System.err.println(ex.getMessage());
+			logEventsRequest.withLogGroupName(logGroupName).withLogStreamName(logStreamName).withSequenceToken(ex.getExpectedSequenceToken()).setLogEvents(logEvents);
+		}
+		catch(InvalidSequenceTokenException ex) {
+			//System.err.println(ex.getMessage());
+			logEventsRequest.withLogGroupName(logGroupName).withLogStreamName(logStreamName).withSequenceToken(ex.getExpectedSequenceToken()).setLogEvents(logEvents);
+		}
 	}
 
 	private void logMessage(String message) {

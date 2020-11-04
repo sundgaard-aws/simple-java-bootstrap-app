@@ -6,7 +6,7 @@ $(function () {
 	$("#btnBookTrade").click(function () { trade.bookTrade() });
 	$("#btnMassBookTrade").click(function () { trade.massBookTrade() });
 	$("#btnGetTrades").click(function () { trade.getTrades() });
-	setInterval(function() { trade.getTrades(); }, 5 * 1000); // 60 * 1000 milsec
+	setInterval(function() { trade.getTrades(); }, 2 * 1000); // 60 * 1000 milsec
 });
 
 function Trade() {
@@ -65,28 +65,38 @@ function Trade() {
 			contentType: "application/json; charset=utf-8",
 			data: "DEMO-USER",
 			success: function (data) {
-				console.log("getTrades() success!");
+				//console.log("getTrades() success!");
 				$("#tradeItems").empty();
 
 				for(var i=0; i<data.Trades.length; i++) {
 					var clone = $("#tradeItemTemplate").clone();
+					var tradeId = data.Trades[i].TradeId;
+					var quote = data.Trades[i].Quote;
+					var tradeAmount = data.Trades[i].TradeAmount;
+					var tradeDate = data.Trades[i].TradeDate;
 					$(clone).removeAttr("id");
-					$(clone).find(".trade-id").html(data.Trades[i].TradeId);
+					$(clone).removeAttr("id");
+					$(clone).find(".trade-id").html(tradeId.substring(tradeId.length-12));
 					$(clone).find(".trade-isin").html(data.Trades[i].TradeISIN);
-					$(clone).find(".trade-date").html(data.Trades[i].TradeDate);
+					$(clone).find(".trade-date").html(tradeDate.substring(5, tradeDate.length-7));
 					$(clone).find(".user-id").html(data.Trades[i].UserId);
 					$(clone).find(".trade-status").html(data.Trades[i].TradeStatus);
-					$(clone).find(".trade-amount").html(data.Trades[i].TradeAmount);
-					$(clone).find(".quote").html(data.Trades[i].Quote);
+					$(clone).find(".trade-amount").html(Number(tradeAmount).toFixed(0));
+					$(clone).find(".quote").html(Number(quote).toFixed(2));
 					$("#tradeItems").append(clone);
-					if(i > 4) break;
+					if(i > 6) break;
 				}
+
+				$("#totalTrades").html(data.TradeMetaData.InvalidTrades);
+				$("#pendingTrades").html(data.TradeMetaData.PendingTrades);
+				$("#validTrades").html(data.TradeMetaData.TotalTrades);
+				$("#invalidTrades").html(data.TradeMetaData.ValidTrades);
 			},
 			error: function (err, err2) {
 				console.error("getTrades() error!");
 			},
 			complete: function () {
-				console.log("getTrades() complete.");
+				//console.log("getTrades() complete.");
 			}
 		});
 	};	

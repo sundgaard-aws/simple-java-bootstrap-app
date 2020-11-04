@@ -40,17 +40,17 @@
         </div>      
         <div class="row align-items-center justify-content-start" style="margin-top: 1rem;">
             <div class="col-12">
-                <button id="btnBookTrade" type="button" class="btn btn-primary">Book trade</button>                
-                <button id="btnMassBookTrade" type="button" class="btn btn-primary">Mass book trade</button>
+                <button id="btnBookTrade" type="button" class="" style="margin-right: 1rem;">Book trade</button>                
+                <button id="btnMassBookTrade" type="button" class="">Mass book trade</button>
             </div>
         </div>
 
-        <div id="tradeDetailsWidget" style="background-color: black; color:aqua; height: 32rem; width: 100%; overflow: auto; margin-top: 3rem;">
-            <div class="row align-items-center justify-content-start">
-                <div class="col-3">
+        <div id="tradeDetailsWidget">
+            <div id="tradeItemsHeader" class="row align-items-center justify-content-start">
+                <div class="col-2">
                     Trade Id
                 </div>
-                <div class="col-3">
+                <div class="col">
                     User Id
                 </div>
                 <div class="col">
@@ -70,7 +70,21 @@
                 </div>
             </div>    
             <div id="tradeItems"></div>        
-        </div>             
+        </div>          
+        <div id="tradeValidationWidget">
+            <div id="tradeValidationWidgetHeader" class="row align-items-center justify-content-start">
+                <div class="col">Total</div>
+                <div class="col">Pending</div>
+                <div class="col">Valid</div>
+                <div class="col">Invalid</div>
+            </div>
+            <div id="tradeValidationWidgetContents" class="row align-items-center justify-content-start">
+                <div id="totalTrades" class="col">N/A</div>
+                <div id="pendingTrades" class="col">N/A</div>
+                <div id="validTrades" class="col">N/A</div>
+                <div id="invalidTrades" class="col">N/A</div>
+            </div>
+        </div>
         <div class="row align-items-center justify-content-start" style="margin-top: 1rem;">
             <div class="col-12">
                 <!--<button id="btnGetTrades" type="button" class="btn btn-primary">Get trades</button>
@@ -82,10 +96,10 @@
 
     <!-- Templates -->
     <div class="row align-items-center justify-content-start tradeItem" style="margin-top: 1rem;" id="tradeItemTemplate">
-        <div class="col-3 trade-id">
+        <div class="col-2 trade-id">
             Trade Id
         </div>
-        <div class="col-3 user-id">
+        <div class="col user-id">
             User Id
         </div>
         <div class="col trade-isin">

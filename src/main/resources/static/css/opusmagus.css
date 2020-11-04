@@ -5,10 +5,45 @@
 body {
 	font-size: 12pt;
 	font-family: Consolas, Calibri, Arial;
-	color: #ffffff;
-	background-color: #2e2b2b;
+	color:#edaa01;
+	background-color: #000200;
+}
+
+input[type=text] {
+	background-color: #111010; color:#01ed30;
+}
+
+button[type=button] {
+	background-color:#edaa01; color: #111010;
+	border-radius: 6px; padding-left: 12px; padding-right: 12px; padding-top: 6px; padding-bottom: 6px;
 }
 
 #tradeItemTemplate {
 	display: none;
+}
+
+#tradeDetailsWidget {
+	background-color: #111010; color: #edaa01; height: 24rem; width: 100%; overflow: none; margin-top: 3rem; border-color: #f2a601; border: solid;
+	white-space: nowrap; padding: 1rem; margin-top: 1rem;
+}
+
+#tradeItemsHeader {
+	font-weight: bold;
+}
+
+#tradeItems {
+	color: #01ed30;
+}
+
+#tradeValidationWidget {
+	background-color: #111010; color: #edaa01; height: 6rem; width: 100%; overflow: none; margin-top: 3rem; border-color: #f2a601; border: solid;
+	white-space: nowrap; padding: 1rem;
+}
+
+#tradeValidationWidgetHeader {
+	font-weight: bold;
+}
+
+#tradeValidationWidgetContents {
+	color: #01ed30;
 }
