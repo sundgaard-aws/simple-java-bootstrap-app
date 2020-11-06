@@ -31,7 +31,8 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.*;
-import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /** Note that we have annotated the DemoController class with @Controller and @RequestMapping("/welcome"). 
  * When Spring scans our package, it will recognize this bean as being a Controller bean for processing requests. 
@@ -46,6 +47,7 @@ public class TradeController {
 	@Autowired private Calendar calendar;
 	@Autowired private SimpMessagingTemplate template;
 	private String queueUrl;
+	private ExecutorService singleThreadExecutor;
 
 	public TradeController() {
 		//GetParameterRequest getparameterRequest = new GetParameterRequest().withName("my-key").withWithDecryption(encryption);
@@ -53,6 +55,7 @@ public class TradeController {
 		GetParameterRequest getparameterRequest = new GetParameterRequest().withName("iac-demo-sqs-queue-url");
 		final GetParameterResult result = ssmClient.getParameter(getparameterRequest);
 		queueUrl = result.getParameter().getValue();
+		singleThreadExecutor = Executors.newSingleThreadExecutor();
 		logMessage("iac-demo-sqs-queue-url=" + queueUrl);
 		logMessage("now=" + now());
 	}
@@ -193,10 +196,9 @@ public class TradeController {
 	}
 
 	private void logMessage(String message) {
-		Callable<Integer> task = () -> {
+		singleThreadExecutor.submit( () -> {
 			logMessage(message, "iac-demo-web-log-group", "iac-demo-web-log-stream");
-			return 0;
-		};
+		});
 	}
 
 	private void logError(String message) {
