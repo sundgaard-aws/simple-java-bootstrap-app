@@ -27,9 +27,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.nio.ByteBuffer;
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.*;
+import java.util.concurrent.Callable;
 
 /** Note that we have annotated the DemoController class with @Controller and @RequestMapping("/welcome"). 
  * When Spring scans our package, it will recognize this bean as being a Controller bean for processing requests. 
@@ -43,6 +45,17 @@ public class TradeController {
 	@Autowired private AWSLogs cloudWatchLogger;
 	@Autowired private Calendar calendar;
 	@Autowired private SimpMessagingTemplate template;
+	private String queueUrl;
+
+	public TradeController() {
+		//GetParameterRequest getparameterRequest = new GetParameterRequest().withName("my-key").withWithDecryption(encryption);
+		AWSSimpleSystemsManagement ssmClient = AWSSimpleSystemsManagementClientBuilder.defaultClient();
+		GetParameterRequest getparameterRequest = new GetParameterRequest().withName("iac-demo-sqs-queue-url");
+		final GetParameterResult result = ssmClient.getParameter(getparameterRequest);
+		queueUrl = result.getParameter().getValue();
+		logMessage("iac-demo-sqs-queue-url=" + queueUrl);
+		logMessage("now=" + now());
+	}
 
 	@PostMapping(path = "/book-trade")
 	public Trade bookTrade(@RequestBody  Trade trade) {
@@ -52,7 +65,8 @@ public class TradeController {
 			trade.Quote = getQuote();
 			trade.TradeDate = now();
 			logMessage("Trade=" + json.toJson(trade));
-			PostToTradeQueue(trade);
+			AmazonSQS sqs = AmazonSQSClientBuilder.defaultClient();
+			PostToTradeQueue(sqs, trade);
 		}
 		else logMessage("Trade was null, not doing anything");
 		return trade;
@@ -62,11 +76,12 @@ public class TradeController {
 	public Trade massBookTrade(@RequestBody  Trade trade) {
 		logMessage("Mass booking trades...");
 		if(trade != null && trade.TradeAmount != null) {
+			AmazonSQS sqs = AmazonSQSClientBuilder.defaultClient();
 			for(int i=0;i<100;i++) {
 				trade.TradeId = UUID.randomUUID().toString();
 				trade.Quote = getQuote();
 				trade.TradeDate = now();
-				PostToTradeQueue(trade);
+				PostToTradeQueue(sqs, trade);
 				logMessage("Trade=" + json.toJson(trade));
 			}
 		}
@@ -178,7 +193,10 @@ public class TradeController {
 	}
 
 	private void logMessage(String message) {
-		logMessage(message, "iac-demo-web-log-group", "iac-demo-web-log-stream");
+		Callable<Integer> task = () -> {
+			logMessage(message, "iac-demo-web-log-group", "iac-demo-web-log-stream");
+			return 0;
+		};
 	}
 
 	private void logError(String message) {
@@ -291,7 +309,7 @@ public class TradeController {
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS", Locale.ENGLISH);
 		//System.out.println("now=" + dateTimeFormatter.format(now));
 		// MYSQL 9999-12-31 23:59:59.999999
-		return dateTimeFormatter.format(now);
+		return dateTimeFormatter.format(now.atZone(ZoneId.of("CET")));
 	}
 
 	/*** 
@@ -299,19 +317,12 @@ public class TradeController {
 		https://docs.aws.amazon.com/cdk/latest/guide/get_ssm_value.html
 	 	https://gist.github.com/davidrosenstark/4a33f2c0eab59d9d7e429bd1c20aea92
 	 ***/
-	private void PostToTradeQueue(Trade trade) {
+	private void PostToTradeQueue(AmazonSQS sqs, Trade trade) {
 		try {
-			AmazonSQS sqs = AmazonSQSClientBuilder.defaultClient();
-			//GetParameterRequest getparameterRequest = new GetParameterRequest().withName("my-key").withWithDecryption(encryption);
-			AWSSimpleSystemsManagement ssmClient = AWSSimpleSystemsManagementClientBuilder.defaultClient();
-			GetParameterRequest getparameterRequest = new GetParameterRequest().withName("iac-demo-sqs-queue-url");
-			final GetParameterResult result = ssmClient.getParameter(getparameterRequest);
-			String queueUrl = result.getParameter().getValue();
-			logMessage("iac-demo-sqs-queue-url=" + queueUrl);
 			SendMessageRequest sendMessageRequest = new SendMessageRequest()
 					.withQueueUrl(queueUrl)
 					.withMessageBody(json.toJson(trade))
-					.withDelaySeconds(5);
+					.withDelaySeconds(0);
 			sqs.sendMessage(sendMessageRequest);
 			logMessage("Message with trade id [" + trade.TradeId + "] was put on queue.");
 		}
